@@ -7,8 +7,8 @@ import yaml
 DEFAULTS = {
     "source": {"type": "outlook_com", "mailbox": "", "folder": "Inbox", "lookback_days": 14},
     "target_address": "",
-    "paths": {"output_dir": "output", "tracking": "suivi_demandes.xlsx",
-              "sorted": "tri_par_objet.xlsx", "reports_dir": "reports"},
+    "paths": {"output_dir": "output", "database": "suivi.db", "powerbi_dir": "powerbi_data",
+              "reports_dir": "reports"},
     "sla": {"days": 3, "business_days": True, "deadline_warning_days": 2},
     "alerts": {"recipients": [], "mode": "digest", "immediate_on_critical": True},
     "weekly_report": {"recipients": []},
@@ -42,8 +42,8 @@ def load_config(path: str | Path) -> dict:
     out = Path(cfg["paths"]["output_dir"])
     out = out if out.is_absolute() else base / out
     cfg["_out"] = out
-    cfg["_tracking"] = out / cfg["paths"]["tracking"]
-    cfg["_sorted"] = out / cfg["paths"]["sorted"]
+    cfg["_db"] = out / cfg["paths"]["database"]
+    cfg["_powerbi"] = out / cfg["paths"]["powerbi_dir"]
     cfg["_reports"] = out / cfg["paths"]["reports_dir"]
     d = Path(cfg["notifier"]["dry_run_dir"])
     cfg["_outbox"] = d if d.is_absolute() else base / d

@@ -14,8 +14,8 @@ source:
 
 paths:
   output_dir: output
-  tracking: suivi_demandes.xlsx    # suivi + tableau de bord
-  sorted: tri_par_objet.xlsx       # mails triés par objet / catégorie
+  database: suivi.db               # base SQLite = source de vérité de l'agent
+  powerbi_dir: powerbi_data        # CSV lus par Power BI (Demandes.csv, Parametres.csv)
   reports_dir: reports
 
 sla:

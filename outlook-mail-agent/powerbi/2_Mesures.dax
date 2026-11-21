@@ -1,0 +1,49 @@
+// =============================================================================
+//  Modèle > Nouvelle table (Calendrier) puis Nouvelle mesure (une par bloc),
+//  toutes à ranger dans la table « Demandes ».
+//  Relation à créer : Calendrier[Date] 1 -> * Demandes[Date_reception]
+// =============================================================================
+
+Calendrier =
+ADDCOLUMNS(
+    CALENDAR(MIN(Demandes[Date_reception]), TODAY()),
+    "Annee_semaine", YEAR([Date] - WEEKDAY([Date], 3)) & "-S" & FORMAT(WEEKNUM([Date], 21), "00")
+)
+
+SLA jours = VALUE(LOOKUPVALUE(Parametres[Valeur], Parametres[Parametre], "SLA_jours"))
+
+Dernière mise à jour = LOOKUPVALUE(Parametres[Valeur], Parametres[Parametre], "Derniere_maj")
+
+Demandes reçues = COUNTROWS(Demandes)
+
+Demandes ouvertes = CALCULATE([Demandes reçues], Demandes[Ouverte] = 1)
+
+Demandes répondues = CALCULATE([Demandes reçues], Demandes[Statut] = "Répondu")
+
+Demandes en alerte = CALCULATE([Demandes reçues], Demandes[Alerte] <> "")
+
+Sans réponse au-delà du SLA = CALCULATE([Demandes reçues], Demandes[Alerte] = "SLA dépassé")
+
+Critiques ouvertes = CALCULATE([Demandes reçues], Demandes[Priorite] = "Critique", Demandes[Ouverte] = 1)
+
+Délai moyen de réponse (j) = AVERAGE(Demandes[Delai_reponse_jours])
+
+Taux de réponse dans le SLA =
+DIVIDE(
+    CALCULATE([Demandes reçues], Demandes[Statut] = "Répondu", Demandes[Delai_reponse_jours] <= [SLA jours]),
+    [Demandes répondues]
+)
+
+Reçues 7 derniers jours =
+CALCULATE([Demandes reçues], DATESINPERIOD(Calendrier[Date], TODAY(), -7, DAY))
+
+// Couleur de mise en forme conditionnelle (Format > Couleur > « Valeur du champ »)
+Couleur alerte =
+SWITCH(
+    SELECTEDVALUE(Demandes[Alerte]),
+    "Critique", "#F8696B",
+    "SLA dépassé", "#F8696B",
+    "Échéance dépassée", "#FFB366",
+    "Échéance proche", "#FFEB84",
+    BLANK()
+)

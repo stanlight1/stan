@@ -90,7 +90,7 @@ class Agent:
     # -- cycle principal
     def run(self) -> dict:
         cfg, now = self.cfg, self.now
-        records = tracker.load_records(cfg["_tracking"])
+        records = tracker.load_records(cfg["_db"])
         for rid, ts in self.state["alerted"].items():
             if rid in records and not rid.startswith("crit:"):
                 records[rid]["alert_sent"] = records[rid].get("alert_sent") or tracker._to_dt(ts)
@@ -145,10 +145,9 @@ class Agent:
             if r["id"] in sent_alerts:
                 r["alert_sent"] = now
 
-        # 5) fichiers Excel
-        cats = [c["name"] for c in cfg["categories"]] + [cfg["default_category"]]
-        tracker.save_tracking(cfg["_tracking"], records, cats)
-        tracker.save_sorted(cfg["_sorted"], records, cats, clean_subject)
+        # 5) base SQLite + export CSV pour Power BI
+        tracker.save_records(cfg["_db"], records)
+        tracker.export_powerbi(cfg["_powerbi"], records, cfg, clean_subject, now)
         stats = {"nouveaux": new, "total": len(records), "alertes_sla_envoyees": len(sent_alerts)}
         log.info("Passage terminé : %s", stats)
         return stats
