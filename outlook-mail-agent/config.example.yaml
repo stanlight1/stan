@@ -1,0 +1,67 @@
+# ============================================================================
+#  Configuration de l'agent - copier ce fichier en config.yaml et l'adapter
+# ============================================================================
+
+# >>> ADRESSE SUIVIE : seuls les mails dont le destinataire (À ou Cc) est cette adresse sont traités.
+target_address: "support@votre-societe.fr"
+
+source:
+  type: outlook_com        # outlook_com (Outlook classique) | graph (recommandé en prod) | json_folder (démo)
+  mailbox: ""              # boîte à lire si différente de la boîte par défaut (boîte partagée). "" = défaut
+  folder: "Inbox"          # dossier à surveiller
+  lookback_days: 14        # fenêtre de relève (les doublons sont ignorés)
+  # path: sample_mails     # (json_folder uniquement)
+
+paths:
+  output_dir: output
+  tracking: suivi_demandes.xlsx    # suivi + tableau de bord
+  sorted: tri_par_objet.xlsx       # mails triés par objet / catégorie
+  reports_dir: reports
+
+sla:
+  days: 3                  # alerte si aucune réponse après N jours
+  business_days: true      # true = jours ouvrés (lun-ven) ; false = jours calendaires
+  deadline_warning_days: 2 # « Échéance proche » si l'échéance citée dans le mail est à <= N jours
+
+alerts:
+  recipients: ["responsable@votre-societe.fr"]   # qui est prévenu des demandes sans réponse / critiques
+  mode: digest             # digest = 1 mail récapitulatif par passage | per_mail = 1 mail par demande
+  immediate_on_critical: true
+
+weekly_report:
+  recipients: ["responsable@votre-societe.fr", "equipe@votre-societe.fr"]   # destinataires du reporting hebdo
+
+# Envoi des alertes et rapports : outlook_com | graph | smtp | file (dry-run : écrit dans dry_run_dir)
+notifier:
+  type: outlook_com
+  dry_run_dir: output/outbox
+  smtp: {host: smtp.office365.com, port: 587, user: "", password_env: SMTP_PASSWORD, from: ""}
+
+# Microsoft Graph (source: graph) - secret dans la variable d'environnement, JAMAIS dans ce fichier
+graph:
+  tenant_id: ""
+  client_id: ""
+  client_secret_env: GRAPH_CLIENT_SECRET
+
+# Résumés par IA (clé dans la variable d'environnement). Sans clé : résumé heuristique, sans IA.
+ai:
+  enabled: true
+  model: claude-haiku-5-5
+  api_key_env: ANTHROPIC_API_KEY
+  max_body_chars: 4000
+
+# Tri par OBJET : la 1re catégorie qui correspond gagne (RE:/TR:/FW: ignorés).
+categories:
+  - name: Accès & comptes
+    subject_contains: ["accès", "acces", "vpn", "compte", "mot de passe", "habilitation"]
+  - name: Facturation
+    subject_contains: ["facture", "avoir", "paiement", "règlement"]
+  - name: Incidents
+    subject_contains: ["incident", "panne", "bloquant", "dysfonctionnement", "erreur"]
+  - name: Contrats
+    subject_contains: ["contrat", "devis", "renouvellement"]
+default_category: Autres
+
+ignore_subjects: ["newsletter", "out of office", "absence du bureau", "accusé de réception"]
+ignore_senders: ["no-reply", "noreply", "mailer-daemon"]
+urgent_keywords: ["urgent", "asap", "bloquant", "critique", "immédiat", "dès que possible"]

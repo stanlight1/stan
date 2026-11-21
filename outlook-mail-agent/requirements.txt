@@ -1,0 +1,11 @@
+openpyxl>=3.1
+PyYAML>=6.0
+# Résumés IA (optionnel mais recommandé) :
+anthropic>=0.40
+# Backend Outlook "classique" (COM) - Windows uniquement :
+pywin32>=306; sys_platform == "win32"
+# Backend Microsoft Graph (recommandé en production) :
+msal>=1.28
+requests>=2.31
+# Tests :
+pytest>=8
