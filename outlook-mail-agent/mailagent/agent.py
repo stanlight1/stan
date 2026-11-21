@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta
 from html import escape
 
 from . import tracker
+from .dashboard import write_dashboard
 from .classify import categorize, is_ignored
 from .models import Outgoing
 from .notifier import make_notifier
@@ -148,6 +149,7 @@ class Agent:
         # 5) base SQLite + export CSV pour Power BI
         tracker.save_records(cfg["_db"], records)
         tracker.export_powerbi(cfg["_powerbi"], records, cfg, clean_subject, now)
+        write_dashboard(cfg["_out"] / cfg["paths"]["dashboard"], records, cfg, clean_subject, now)
         stats = {"nouveaux": new, "total": len(records), "alertes_sla_envoyees": len(sent_alerts)}
         log.info("Passage terminé : %s", stats)
         return stats

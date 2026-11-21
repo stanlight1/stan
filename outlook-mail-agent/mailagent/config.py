@@ -8,7 +8,7 @@ DEFAULTS = {
     "source": {"type": "outlook_com", "mailbox": "", "folder": "Inbox", "lookback_days": 14},
     "target_address": "",
     "paths": {"output_dir": "output", "database": "suivi.db", "powerbi_dir": "powerbi_data",
-              "reports_dir": "reports"},
+              "reports_dir": "reports", "dashboard": "tableau_de_bord.html"},
     "sla": {"days": 3, "business_days": True, "deadline_warning_days": 2},
     "alerts": {"recipients": [], "mode": "digest", "immediate_on_critical": True},
     "weekly_report": {"recipients": []},

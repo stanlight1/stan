@@ -1,3 +1,9 @@
+# Power BI Desktop (OPTION - usage personnel, sans licence)
+
+> **Sans licence Pro, ce guide ne couvre que Power BI Desktop gratuit sur votre PC** : pas de partage, d'abonnement,
+> d'alerte ni d'actualisation planifiée (les sections 3 et 4 ne s'appliquent qu'avec Pro/Premium). Le tableau de bord
+> partageable est `output/tableau_de_bord.html`. Dans Desktop, actualisez manuellement (bouton *Actualiser*).
+
 # Construire le tableau de bord Power BI (≈ 30 min)
 
 > Je n'ai pas pu générer de fichier `.pbix` : il faut Power BI Desktop (Windows) pour le créer et le valider.

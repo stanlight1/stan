@@ -1,19 +1,24 @@
-# Agent de suivi des demandes Outlook → Power BI
+# Agent de suivi des demandes Outlook → tableau de bord (sans licence)
 
 Agent Python (Windows) qui relève les mails reçus sur **une adresse donnée**, les trie par objet, les résume (IA),
-alimente une **base de suivi + tableau de bord Power BI**, prévient quand **aucune réponse n'a été faite après 3 jours**
+alimente une **base de suivi + un tableau de bord HTML** (Power BI Desktop en option), prévient quand **aucune réponse n'a été faite après 3 jours**
 et envoie un **reporting hebdomadaire**.
 
 | Besoin | Où / comment |
 |---|---|
 | Récupérer les mails d'une adresse (à renseigner) | `target_address` dans `config.yaml` ; sources `outlook_com` ou `graph` |
 | Trier par objet | colonnes `Categorie` (règles `categories:`) et `Objet_nettoye` ; page « Tri par objet » de Power BI |
-| Résumé + tracking + tableau de bord + alertes | base `output/suivi.db` → CSV `output/powerbi_data/` → **Power BI** (`powerbi/`) |
+| Résumé + tracking + tableau de bord + alertes | base `output/suivi.db` → **`output/tableau_de_bord.html`** (autonome, partageable) ; CSV `output/powerbi_data/` pour Power BI Desktop (option) |
 | Alerte « sans retour après 3 jours » | e-mail de l'agent aux `alerts.recipients`, **une seule fois par demande** ; `sla.days` |
 | Reporting hebdo | e-mail HTML de l'agent (lundi 08:00) + abonnement Power BI (optionnel) |
 
-**Architecture** : `Outlook → agent (Python) → SQLite + CSV → Power BI`. Power BI affiche mais ne stocke/modifie rien :
-c'est pourquoi la base vit côté agent.
+**Architecture** : `Outlook → agent (Python) → SQLite → tableau_de_bord.html (+ CSV pour Power BI Desktop)`.
+
+**Pourquoi HTML et pas Power BI ?** Sans licence Pro, Power BI ne permet ni partage, ni abonnement, ni alertes, ni actualisation
+planifiée : le rapport ne serait lisible que par son auteur, sur son PC. Le HTML est généré par l'agent à chaque passage, s'ouvre
+dans n'importe quel navigateur (filtre, tri de colonnes, groupement par objet), sans licence ni serveur. Placez `output_dir` sur un
+dossier réseau/OneDrive/SharePoint pour le partager. Limite : c'est un instantané statique (F5 pour actualiser), pas un outil
+d'exploration libre comme Power BI. Les alertes et le reporting par e-mail sont envoyés par l'agent, donc sans licence non plus.
 
 ## Installation (Windows)
 ```powershell
@@ -25,7 +30,7 @@ setx ANTHROPIC_API_KEY "sk-ant-..."         # optionnel : résumés par IA (sino
 python -m mailagent run -c config.yaml      # 1er passage manuel
 powershell -ExecutionPolicy Bypass -File .\install_tasks.ps1   # planification (30 min + lundi 08:00)
 ```
-Dashboard : suivre `powerbi/GUIDE_POWERBI.md` (requêtes Power Query + mesures DAX fournies).
+Dashboard : ouvrir `output/tableau_de_bord.html`. Power BI Desktop (gratuit, usage personnel) : `powerbi/GUIDE_POWERBI.md`.
 Essai sans Outlook : `python -m mailagent.demo` puis `source.type: json_folder` + `notifier.type: file`
 (les mails d'alerte sont écrits dans `output/outbox` au lieu d'être envoyés).
 
@@ -59,7 +64,7 @@ Essai sans Outlook : `python -m mailagent.demo` puis `source.type: json_folder` 
 
 ## Propositions pour aller plus loin (par ordre de valeur)
 1. **Passer à Microsoft Graph** + hébergement sur un serveur/VM ou Azure Function : fiabilité 24/7.
-2. **Base partagée** (liste SharePoint, Dataverse ou SQL Azure) + **formulaire Power Apps** pour changer les statuts :
+2. **Si vous obtenez des licences Power BI Pro**, ou **Base partagée** (liste SharePoint, Dataverse ou SQL Azure) + **formulaire Power Apps** pour changer les statuts :
    Power BI s'y connecte en direct (actualisation plus fine), plusieurs personnes peuvent traiter les demandes.
 3. **Détection des relances** : un nouveau mail du demandeur dans une conversation déjà « Répondue » doit la rouvrir
    (actuellement une conversation = une demande, la relance n'est pas détectée).

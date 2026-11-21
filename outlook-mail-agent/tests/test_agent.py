@@ -70,3 +70,15 @@ def test_rapport(cfg):
     weekly_report(ag, ref=datetime(2026, 11, 21))
     assert list(cfg["_reports"].glob("reporting_*.html"))
     assert any("Reporting hebdo" in p.read_text(encoding="utf-8") for p in cfg["_outbox"].glob("*.html"))
+
+
+def test_dashboard_html_echappe(cfg):
+    import json
+    f = cfg["_base"] / "sample_mails" / "x.json"
+    f.write_text(json.dumps({"id": "x", "conversation_id": "cx", "received": NOW.isoformat(),
+                             "sender": "a@b.fr", "to": [TARGET], "subject": "Test <script>alert(1)</script>",
+                             "body": "<img src=x onerror=alert(1)>"}), encoding="utf-8")
+    Agent(cfg, now=NOW).run()
+    h = (cfg["_out"] / "tableau_de_bord.html").read_text(encoding="utf-8")
+    assert "Suivi des demandes" in h and "À traiter" in h
+    assert "<script>alert(1)" not in h and "<img src=x" not in h

@@ -15,6 +15,7 @@ source:
 paths:
   output_dir: output
   database: suivi.db               # base SQLite = source de vérité de l'agent
+  dashboard: tableau_de_bord.html  # tableau de bord HTML (sans licence), à partager par dossier réseau
   powerbi_dir: powerbi_data        # CSV lus par Power BI (Demandes.csv, Parametres.csv)
   reports_dir: reports
 
